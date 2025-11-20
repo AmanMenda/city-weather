@@ -1,3 +1,4 @@
+import 'package:city_weather/viewmodels/search_viewmodel.dart';
 import 'package:city_weather/views/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -11,7 +12,11 @@ class CityWeatherApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => SearchViewModel()),
+      ],
+      child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'City Weather',
         theme: ThemeData(
@@ -22,6 +27,7 @@ class CityWeatherApp extends StatelessWidget {
           useMaterial3: true,
         ),
         home: const SearchScreen(),
+      ),
     );
   }
 }
