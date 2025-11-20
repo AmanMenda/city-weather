@@ -1,3 +1,0 @@
-class RoutePaths {
-  RoutePaths._();
-}
