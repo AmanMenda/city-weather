@@ -1,6 +1,8 @@
-import 'package:city_weather/viewmodels/search_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../viewmodels/search_viewmodel.dart';
+import '../viewmodels/weather_viewmodel.dart';
+import 'weather_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -21,12 +23,13 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final searchViewModel = Provider.of<SearchViewModel>(context);
+    final weatherViewModel = Provider.of<WeatherViewModel>(
+      context,
+      listen: false,
+    );
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('City Weather'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('City Weather'), centerTitle: true),
       body: Column(
         children: [
           Padding(
@@ -47,17 +50,16 @@ class _SearchScreenState extends State<SearchScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                fillColor:
+                    Theme.of(context).colorScheme.surfaceContainerHighest,
               ),
               onSubmitted: (value) {
                 searchViewModel.searchCities(value);
               },
             ),
           ),
-
           if (searchViewModel.isLoading)
             const Expanded(child: Center(child: CircularProgressIndicator()))
-
           else if (searchViewModel.errorMessage != null)
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -67,7 +69,6 @@ class _SearchScreenState extends State<SearchScreen> {
                 textAlign: TextAlign.center,
               ),
             )
-
           else
             Expanded(
               child: ListView.builder(
@@ -83,15 +84,65 @@ class _SearchScreenState extends State<SearchScreen> {
                         city.name,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      subtitle: Text(city.country ?? ''),
+                      subtitle: Text('${city.country ?? ''}'),
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () {},
+                      onTap: () {
+                        weatherViewModel.fetchWeather(city);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const WeatherScreen(),
+                          ),
+                        );
+                      },
                     ),
                   );
                 },
               ),
             ),
-        ]
+        ],
+      ),
+      floatingActionButton: Consumer<WeatherViewModel>(
+        builder: (context, weatherViewModel, child) {
+          return FloatingActionButton.extended(
+            onPressed:
+                weatherViewModel.isLoading
+                    ? null
+                    : () async {
+                      await weatherViewModel.fetchWeatherByLocation();
+                      if (context.mounted) {
+                        if (weatherViewModel.errorMessage != null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(weatherViewModel.errorMessage!),
+                            ),
+                          );
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const WeatherScreen(),
+                            ),
+                          );
+                        }
+                      }
+                    },
+            icon:
+                weatherViewModel.isLoading
+                    ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                    : const Icon(Icons.my_location),
+            label: Text(
+              weatherViewModel.isLoading ? 'Locating...' : 'My Location',
+            ),
+          );
+        },
       ),
     );
   }

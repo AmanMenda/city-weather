@@ -2,6 +2,7 @@ import 'package:city_weather/viewmodels/search_viewmodel.dart';
 import 'package:city_weather/views/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:city_weather/viewmodels/weather_viewmodel.dart';
 
 void main() {
   runApp(const CityWeatherApp());
@@ -14,7 +15,8 @@ class CityWeatherApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => SearchViewModel()),
+        ChangeNotifierProvider(create: (_) => SearchViewModel()),
+        ChangeNotifierProvider(create: (_) => WeatherViewModel()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
