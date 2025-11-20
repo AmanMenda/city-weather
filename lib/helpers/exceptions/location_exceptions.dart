@@ -13,7 +13,7 @@ class LocationServiceDisabledException implements Exception {
   @override
   String toString() => 'LocationServiceDisabledException: $message';
 }
-/// Custom exception for location timeout
+
 class LocationTimeoutException implements Exception {
   final String message;
   LocationTimeoutException(this.message);
