@@ -21,12 +21,10 @@ class LocationService {
     }
 
     LocationPermission permission = await checkPermission();
-
     if (permission == LocationPermission.always ||
         permission == LocationPermission.whileInUse) {
       return true;
     }
-
     if (permission == LocationPermission.deniedForever) {
       throw custom_exceptions.LocationPermissionDeniedException(
         'Location permission is permanently denied. Please enable it in app settings.',
@@ -34,13 +32,11 @@ class LocationService {
     }
 
     permission = await Geolocator.requestPermission();
-
     if (permission == LocationPermission.denied) {
       throw custom_exceptions.LocationPermissionDeniedException(
         'Location permission was denied. Please grant location access to use this feature.',
       );
     }
-
     if (permission == LocationPermission.deniedForever) {
       throw custom_exceptions.LocationPermissionDeniedException(
         'Location permission is permanently denied. Please enable it in app settings.',
@@ -51,10 +47,7 @@ class LocationService {
         permission == LocationPermission.whileInUse;
   }
 
-  Future<Position> getCurrentPosition({
-    LocationAccuracy desiredAccuracy = LocationAccuracy.high,
-    Duration timeLimit = const Duration(seconds: 15),
-  }) async {
+  Future<Position> getCurrentPosition() async {
     try {
       if (!await isLocationServiceEnabled()) {
         throw custom_exceptions.LocationServiceDisabledException(
@@ -66,7 +59,6 @@ class LocationService {
 
       if (permission == LocationPermission.denied ||
           permission == LocationPermission.deniedForever) {
-
         if (!await requestPermission()) {
           throw custom_exceptions.LocationPermissionDeniedException(
             'Location permission is required to get your current position.',
