@@ -1,10 +1,18 @@
 import 'dart:async';
 
 import 'package:city_weather/helpers/exceptions/location_exceptions.dart' as custom_exceptions;
-import 'package:city_weather/services/implementations/geolocator_wrapper.dart';
-import 'package:city_weather/services/interfaces/geolocator_interface.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart' as ph;
+
+/// Interface for Geolocator operations to enable testing
+abstract class GeolocatorInterface {
+  Future<bool> isLocationServiceEnabled();
+  Future<LocationPermission> checkPermission();
+  Future<LocationPermission> requestPermission();
+  Future<Position> getCurrentPosition();
+  Future<Position?> getLastKnownPosition();
+  Future<bool> openLocationSettings();
+}
 
 class LocationService {
   final GeolocatorInterface _geolocator;
@@ -132,3 +140,34 @@ class LocationService {
   }
 }
 
+class GeolocatorWrapper implements GeolocatorInterface {
+  @override
+  Future<bool> isLocationServiceEnabled() async {
+    return await Geolocator.isLocationServiceEnabled();
+  }
+
+  @override
+  Future<LocationPermission> checkPermission() async {
+    return await Geolocator.checkPermission();
+  }
+
+  @override
+  Future<LocationPermission> requestPermission() async {
+    return await Geolocator.requestPermission();
+  }
+
+  @override
+  Future<Position> getCurrentPosition() async {
+    return await Geolocator.getCurrentPosition();
+  }
+
+  @override
+  Future<Position?> getLastKnownPosition() async {
+    return await Geolocator.getLastKnownPosition();
+  }
+
+  @override
+  Future<bool> openLocationSettings() async {
+    return await Geolocator.openLocationSettings();
+  }
+}

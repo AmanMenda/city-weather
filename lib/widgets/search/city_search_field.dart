@@ -31,6 +31,11 @@ class CitySearchField extends StatelessWidget {
           fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         ),
         onSubmitted: (_) => onSearch(),
+        onChanged: (value) {
+          if (value.isEmpty) {
+            onSearch();
+          }
+        },
       ),
     );
   }

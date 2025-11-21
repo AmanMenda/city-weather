@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:city_weather/helpers/exceptions/location_exceptions.dart'
     as custom_exceptions;
-import 'package:city_weather/services/interfaces/geolocator_interface.dart';
 import 'package:city_weather/services/location_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';

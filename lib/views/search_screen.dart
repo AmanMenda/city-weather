@@ -42,7 +42,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _handleFavoriteRemove(City city) async {
-    final searchViewModel = Provider.of<SearchViewModel>(context);
+    final searchViewModel = Provider.of<SearchViewModel>(context, listen: false);
     final success = await searchViewModel.removeFavorite(city);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -73,7 +73,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _handleFavoriteToggle(City city) async {
-    final searchViewModel = Provider.of<SearchViewModel>(context);
+    final searchViewModel = Provider.of<SearchViewModel>(context, listen: false);
     final isFavorite = searchViewModel.isFavorite(city);
 
     if (isFavorite) {
@@ -132,45 +132,58 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final searchViewModel = Provider.of<SearchViewModel>(context);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('City Weather'),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          CitySearchField(
-            controller: _controller,
-            onSearch: () => searchViewModel.searchCities(_controller.text),
-          ),
-          FavoritesSection(
-            favorites: searchViewModel.favorites,
-            onFavoriteTap: _handleFavoriteTap,
-            onFavoriteRemove: _handleFavoriteRemove,
-          ),
-          if (searchViewModel.isLoading)
-            const LoadingIndicator()
-          else if (searchViewModel.errorMessage != null)
-            ErrorMessage(message: searchViewModel.errorMessage!)
-          else
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: searchViewModel.cities.length,
-                itemBuilder: (context, index) {
-                  final city = searchViewModel.cities[index];
-                  return CityListItem(
-                    city: city,
-                    isFavorite: searchViewModel.isFavorite(city),
-                    onTap: () => _handleCityTap(city),
-                    onFavoriteToggle: () => _handleFavoriteToggle(city),
-                  );
-                },
+      body: Consumer<SearchViewModel>(
+        builder: (context, searchViewModel, child) {
+          return Column(
+            children: [
+              CitySearchField(
+                controller: _controller,
+                onSearch: () => searchViewModel.searchCities(_controller.text),
               ),
-            ),
-        ],
+              FavoritesSection(
+                favorites: searchViewModel.favorites,
+                onFavoriteTap: _handleFavoriteTap,
+                onFavoriteRemove: _handleFavoriteRemove,
+              ),
+              if (searchViewModel.isLoading)
+                const LoadingIndicator()
+              else if (searchViewModel.errorMessage != null)
+                ErrorMessage(message: searchViewModel.errorMessage!)
+              else if (searchViewModel.cities.isEmpty && _controller.text.isEmpty)
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      searchViewModel.favorites.isEmpty
+                          ? 'Search for a city or use your location'
+                          : 'Your favorites are shown above',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ),
+                )
+              else
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: searchViewModel.cities.length,
+                    itemBuilder: (context, index) {
+                      final city = searchViewModel.cities[index];
+                      return CityListItem(
+                        city: city,
+                        isFavorite: searchViewModel.isFavorite(city),
+                        onTap: () => _handleCityTap(city),
+                        onFavoriteToggle: () => _handleFavoriteToggle(city),
+                      );
+                    },
+                  ),
+                ),
+            ],
+          );
+        },
       ),
       floatingActionButton: LocationFloatingButton(
         onSuccess: _handleLocationSuccess,
