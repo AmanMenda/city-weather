@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/city.dart';
-import '../models/weather.dart';
-import '../utils/constants.dart';
+import 'package:city_weather/models/city.dart';
+import 'package:city_weather/models/weather.dart';
+import 'package:city_weather/utils/constants.dart';
 
 class ApiService {
   Future<List<City>> searchCities(String query) async {

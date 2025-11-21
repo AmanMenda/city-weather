@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/search_viewmodel.dart';
-import '../viewmodels/weather_viewmodel.dart';
+import 'package:city_weather/viewmodels/search_viewmodel.dart';
+import 'package:city_weather/viewmodels/weather_viewmodel.dart';
 import 'weather_screen.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -84,7 +84,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         city.name,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      subtitle: Text('${city.country ?? ''}'),
+                      subtitle: Text(city.country ?? ''),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
                         weatherViewModel.fetchWeather(city);
