@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:city_weather/models/city.dart';
 import 'package:city_weather/viewmodels/search_viewmodel.dart';
 import 'package:city_weather/viewmodels/weather_viewmodel.dart';
-import 'weather_screen.dart';
+import 'package:city_weather/widgets/search/city_search_field.dart';
+import 'package:city_weather/widgets/search/favorites_section.dart';
+import 'package:city_weather/widgets/search/city_list_item.dart';
+import 'package:city_weather/widgets/search/location_floating_button.dart';
+import 'package:city_weather/widgets/common/loading_indicator.dart';
+import 'package:city_weather/widgets/common/error_message.dart';
+import 'package:city_weather/views/weather_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -20,298 +27,167 @@ class _SearchScreenState extends State<SearchScreen> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final searchViewModel = Provider.of<SearchViewModel>(context);
+  void _handleFavoriteTap(City city) {
     final weatherViewModel = Provider.of<WeatherViewModel>(
       context,
       listen: false,
     );
+    weatherViewModel.fetchWeather(city);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const WeatherScreen(),
+      ),
+    );
+  }
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('City Weather'), centerTitle: true),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _controller,
-              decoration: InputDecoration(
-                labelText: 'Search City',
-                hintText: 'Enter city name (e.g. Paris)',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.arrow_forward),
-                  onPressed: () {
-                    searchViewModel.searchCities(_controller.text);
-                  },
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                filled: true,
-                fillColor:
-                    Theme.of(context).colorScheme.surfaceContainerHighest,
-              ),
-              onSubmitted: (value) {
-                searchViewModel.searchCities(value);
-              },
-            ),
+  void _handleFavoriteRemove(City city) async {
+    final searchViewModel = Provider.of<SearchViewModel>(context, listen: false);
+    final success = await searchViewModel.removeFavorite(city);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            success
+                ? 'Removed from favorites'
+                : 'Failed to remove favorite',
           ),
-          // Favorites Section
-          if (searchViewModel.favorites.isNotEmpty)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Favorites (${searchViewModel.favorites.length}/10)',
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                    ],
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    }
+  }
+
+  void _handleCityTap(City city) {
+    final weatherViewModel = Provider.of<WeatherViewModel>(
+      context,
+      listen: false,
+    );
+    weatherViewModel.fetchWeather(city);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const WeatherScreen(),
+      ),
+    );
+  }
+
+  void _handleFavoriteToggle(City city) async {
+    final searchViewModel = Provider.of<SearchViewModel>(context, listen: false);
+    final isFavorite = searchViewModel.isFavorite(city);
+
+    if (isFavorite) {
+      final success = await searchViewModel.removeFavorite(city);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              success
+                  ? 'Removed from favorites'
+                  : 'Failed to remove favorite',
+            ),
+            duration: const Duration(seconds: 1),
+          ),
+        );
+      }
+    } else {
+      final success = await searchViewModel.addFavorite(city);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              success
+                  ? 'Added to favorites'
+                  : 'Maximum 10 favorites reached',
+            ),
+            duration: const Duration(seconds: 1),
+          ),
+        );
+      }
+    }
+  }
+
+  void _handleLocationSuccess() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const WeatherScreen(),
+      ),
+    );
+  }
+
+  void _handleLocationError() {
+    final weatherViewModel = Provider.of<WeatherViewModel>(
+      context,
+      listen: false,
+    );
+    if (mounted && weatherViewModel.errorMessage != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(weatherViewModel.errorMessage!),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('City Weather'),
+        centerTitle: true,
+      ),
+      body: Consumer<SearchViewModel>(
+        builder: (context, searchViewModel, child) {
+          return Column(
+            children: [
+              CitySearchField(
+                controller: _controller,
+                onSearch: () => searchViewModel.searchCities(_controller.text),
+              ),
+              FavoritesSection(
+                favorites: searchViewModel.favorites,
+                onFavoriteTap: _handleFavoriteTap,
+                onFavoriteRemove: _handleFavoriteRemove,
+              ),
+              if (searchViewModel.isLoading)
+                const LoadingIndicator()
+              else if (searchViewModel.errorMessage != null)
+                ErrorMessage(message: searchViewModel.errorMessage!)
+              else if (searchViewModel.cities.isEmpty && _controller.text.isEmpty)
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      searchViewModel.favorites.isEmpty
+                          ? 'Search for a city or use your location'
+                          : 'Your favorites are shown above',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  height: 100,
+                )
+              else
+                Expanded(
                   child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: searchViewModel.favorites.length,
+                    itemCount: searchViewModel.cities.length,
                     itemBuilder: (context, index) {
-                      final city = searchViewModel.favorites[index];
-                      return Card(
-                        margin: const EdgeInsets.only(right: 8),
-                        child: InkWell(
-                          onTap: () {
-                            weatherViewModel.fetchWeather(city);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const WeatherScreen(),
-                              ),
-                            );
-                          },
-                          borderRadius: BorderRadius.circular(12),
-                          child: Container(
-                            width: 120,
-                            padding: const EdgeInsets.all(8),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Icon(Icons.location_city, size: 14),
-                                    InkWell(
-                                      onTap: () async {
-                                        final success = await searchViewModel
-                                            .removeFavorite(city);
-                                        if (context.mounted) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                success
-                                                    ? 'Removed from favorites'
-                                                    : 'Failed to remove favorite',
-                                              ),
-                                              duration: const Duration(
-                                                seconds: 1,
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                      },
-                                      child: const Padding(
-                                        padding: EdgeInsets.all(4.0),
-                                        child: Icon(
-                                          Icons.star,
-                                          color: Colors.amber,
-                                          size: 14,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Flexible(
-                                  child: Text(
-                                    city.name,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                if (city.country != null)
-                                  Flexible(
-                                    child: Text(
-                                      city.country!,
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        color:
-                                            Theme.of(
-                                              context,
-                                            ).textTheme.bodySmall?.color,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
+                      final city = searchViewModel.cities[index];
+                      return CityListItem(
+                        city: city,
+                        isFavorite: searchViewModel.isFavorite(city),
+                        onTap: () => _handleCityTap(city),
+                        onFavoriteToggle: () => _handleFavoriteToggle(city),
                       );
                     },
                   ),
                 ),
-                const SizedBox(height: 8),
-                const Divider(),
-              ],
-            ),
-          if (searchViewModel.isLoading)
-            const Expanded(child: Center(child: CircularProgressIndicator()))
-          else if (searchViewModel.errorMessage != null)
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                searchViewModel.errorMessage!,
-                style: const TextStyle(color: Colors.red),
-                textAlign: TextAlign.center,
-              ),
-            )
-          else
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: searchViewModel.cities.length,
-                itemBuilder: (context, index) {
-                  final city = searchViewModel.cities[index];
-                  final isFav = searchViewModel.isFavorite(city);
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: ListTile(
-                      leading: const Icon(Icons.location_city),
-                      title: Text(
-                        city.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text('${city.country ?? ''}'),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: Icon(
-                              isFav ? Icons.star : Icons.star_border,
-                              color: isFav ? Colors.amber : null,
-                            ),
-                            onPressed: () async {
-                              if (isFav) {
-                                final success = await searchViewModel
-                                    .removeFavorite(city);
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        success
-                                            ? 'Removed from favorites'
-                                            : 'Failed to remove favorite',
-                                      ),
-                                      duration: const Duration(seconds: 1),
-                                    ),
-                                  );
-                                }
-                              } else {
-                                final success = await searchViewModel
-                                    .addFavorite(city);
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        success
-                                            ? 'Added to favorites'
-                                            : 'Maximum 10 favorites reached',
-                                      ),
-                                      duration: const Duration(seconds: 1),
-                                    ),
-                                  );
-                                }
-                              }
-                            },
-                          ),
-                          const Icon(Icons.chevron_right),
-                        ],
-                      ),
-                      onTap: () {
-                        weatherViewModel.fetchWeather(city);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const WeatherScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-        ],
-      ),
-      floatingActionButton: Consumer<WeatherViewModel>(
-        builder: (context, weatherViewModel, child) {
-          return FloatingActionButton.extended(
-            onPressed:
-                weatherViewModel.isLoading
-                    ? null
-                    : () async {
-                      await weatherViewModel.fetchWeatherByLocation();
-                      if (context.mounted) {
-                        if (weatherViewModel.errorMessage != null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(weatherViewModel.errorMessage!),
-                            ),
-                          );
-                        } else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const WeatherScreen(),
-                            ),
-                          );
-                        }
-                      }
-                    },
-            icon:
-                weatherViewModel.isLoading
-                    ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
-                    : const Icon(Icons.my_location),
-            label: Text(
-              weatherViewModel.isLoading ? 'Locating...' : 'My Location',
-            ),
+            ],
           );
         },
+      ),
+      floatingActionButton: LocationFloatingButton(
+        onSuccess: _handleLocationSuccess,
+        onError: _handleLocationError,
       ),
     );
   }
