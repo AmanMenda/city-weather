@@ -1,70 +1,91 @@
-# city-weather
-Application météo développée en Flutter permettant de rechercher des villes, d'obtenir les prévisions météorologiques et d'utiliser la géolocalisation en temps réel.
+# City Weather
 
-## 📱 Fonctionnalités
+Application météorologique développée en Flutter permettant de rechercher des villes, d'obtenir les prévisions météorologiques et d'utiliser la géolocalisation en temps réel.
 
-  * **🔎 Recherche de ville :** Autocomplétion et recherche via l'API *Open-Meteo Geocoding*.
-  * **📍 Géolocalisation :** Détection de la position actuelle (GPS) pour afficher la météo locale.
-  * **🌡️ Météo détaillée :** Affichage de la température et de la vitesse du vent via *Open-Meteo Forecast*.
-  * **🗺️ Navigation externe :** Redirection vers Google Maps / Plans pour visualiser la ville.
-  * **⚡ Architecture MVVM :** Utilisation de `Provider` pour une gestion d'état propre.
+## Fonctionnalités
 
-## 🛠️ Stack Technique
+- Recherche de ville avec autocomplétion via l'API Open-Meteo Geocoding
+- Géolocalisation pour afficher la météo de la position actuelle
+- Affichage des prévisions météorologiques (température, vitesse du vent) via Open-Meteo Forecast
+- Navigation externe vers Google Maps / Plans pour visualiser la localisation
+- Architecture MVVM avec gestion d'état via Provider
 
-  * **Langage :** Dart / Flutter SDK
-  * **Architecture :** MVVM (Model - View - ViewModel)
-  * **Gestion d'état :** `provider`
+## Technologies
 
-### Packages utilisés
+- **Langage :** Dart / Flutter SDK 3.38.2
+- **Architecture :** MVVM (Model - View - ViewModel)
+- **Gestion d'état :** Provider
+- **Injection de dépendances :** GetIt
+
+### Dépendances principales
 
 | Package | Version | Usage |
 | :--- | :--- | :--- |
-| `http` | `^1.2.0` | Appels API REST |
-| `geolocator` | `^12.0.0` | Accès au GPS du téléphone |
-| `url_launcher`| `^6.3.0` | Ouverture des liens externes (Maps) |
-| `provider` | `(latest)`| State Management |
+| `provider` | `^6.1.5+1` | Gestion d'état |
+| `geolocator` | `^14.0.2` | Accès au GPS |
+| `permission_handler` | `^12.0.1` | Gestion des permissions |
+| `http` | `^1.6.0` | Appels API REST |
+| `url_launcher` | `^6.3.2` | Ouverture des liens externes |
+| `get_it` | `^9.0.5` | Injection de dépendances |
+| `logger` | `^2.6.2` | Logging |
+| `mocktail` | `^1.0.0` | Mocking pour les tests |
 
-## 🧱 Architecture du projet
+## Architecture
 
-Le projet respecte le pattern **MVVM** pour séparer la logique métier de l'interface utilisateur.
+Le projet suit le pattern MVVM pour séparer la logique métier de l'interface utilisateur :
 
+- **Models :** Représentation des données (City, Weather)
+- **Views :** Interface utilisateur (SearchScreen, WeatherScreen)
+- **ViewModels :** Logique métier et gestion d'état (SearchViewModel, WeatherViewModel)
+- **Services :** Accès aux APIs et fonctionnalités système (ApiService, LocationService, MapService)
+- **Interfaces :** Abstraction pour faciliter les tests (GeolocatorInterface)
+- **Implementations :** Implémentations concrètes (GeolocatorWrapper)
 
-## 🚀 Installation et Lancement
+## Installation
 
-1.  **Cloner le projet :**
+1. Cloner le projet :
 
-    ```bash
-    git clone https://github.com/votre-username/cityweather.git
-    cd cityweather
-    ```
+```bash
+git clone <repository-url>
+cd city-weather
+```
 
-2.  **Installer les dépendances :**
+2. Installer les dépendances :
 
-    ```bash
-    flutter pub get
-    ```
+```bash
+flutter pub get
+```
 
-3.  **Configuration des permissions (Android/iOS) :**
+3. Configuration des permissions :
 
-      * *Android :* Vérifier les permissions `ACCESS_FINE_LOCATION` dans `AndroidManifest.xml`.
-      * *iOS :* Vérifier les clés `NSLocationWhenInUseUsageDescription` dans `Info.plist`.
+**Android :** Les permissions `ACCESS_FINE_LOCATION` et `ACCESS_COARSE_LOCATION` sont configurées dans `android/app/src/main/AndroidManifest.xml`.
 
-4.  **Lancer l'application :**
+**iOS :** Les clés `NSLocationWhenInUseUsageDescription` et `NSLocationAlwaysAndWhenInUseUsageDescription` sont configurées dans `ios/Runner/Info.plist`.
 
-    ```bash
-    flutter run
-    ```
+4. Lancer l'application :
 
-## 🌐 APIs Externes (Open Source)
+```bash
+flutter run
+```
 
-Ce projet utilise les APIs gratuites d'Open-Meteo (aucune clé API requise) :
+## Tests
 
-  * **Geocoding :** `https://geocoding-api.open-meteo.com/v1/search`
-  * **Météo :** `https://api.open-meteo.com/v1/forecast`
+Exécuter les tests unitaires :
 
-## 👥 Auteurs
+```bash
+flutter test
+```
 
-**Binôme :**
+Les tests utilisent `mocktail` pour mocker les dépendances et tester l'isolation des services.
 
-  * Charmeel Vodouhe
-  * Aman Menda
+## APIs externes
+
+Le projet utilise les APIs gratuites d'Open-Meteo (aucune clé API requise) :
+
+- **Geocoding :** `https://geocoding-api.open-meteo.com/v1/search`
+- **Forecast :** `https://api.open-meteo.com/v1/forecast`
+
+## Auteurs
+
+- Charmeel Vodouhe
+- Aman Menda
