@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/weather_viewmodel.dart';
+import 'package:city_weather/viewmodels/weather_viewmodel.dart';
 
 class WeatherScreen extends StatelessWidget {
   const WeatherScreen({super.key});
@@ -22,7 +22,7 @@ class WeatherScreen extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+            end: Alignment.bottomCenter,
             colors: [weather?.color ?? Colors.blueGrey, Colors.black],
           ),
         ),

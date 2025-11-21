@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../models/city.dart';
-import '../models/weather.dart';
-import '../services/api_service.dart';
-import '../services/location_service.dart';
-import '../services/google_map_service.dart';
+import 'package:city_weather/models/city.dart';
+import 'package:city_weather/models/weather.dart';
+import 'package:city_weather/services/api_service.dart';
+import 'package:city_weather/services/location_service.dart';
+import 'package:city_weather/services/google_map_service.dart';
 
 class WeatherViewModel extends ChangeNotifier {
   final ApiService _apiService = ApiService();

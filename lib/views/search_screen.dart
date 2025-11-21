@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/search_viewmodel.dart';
-import '../viewmodels/weather_viewmodel.dart';
+import 'package:city_weather/viewmodels/search_viewmodel.dart';
+import 'package:city_weather/viewmodels/weather_viewmodel.dart';
 import 'weather_screen.dart';
 
 class SearchScreen extends StatefulWidget {
