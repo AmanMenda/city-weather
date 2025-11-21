@@ -1,16 +1,25 @@
 import 'dart:async';
 
 import 'package:city_weather/helpers/exceptions/location_exceptions.dart' as custom_exceptions;
+import 'package:city_weather/services/implementations/geolocator_wrapper.dart';
+import 'package:city_weather/services/interfaces/geolocator_interface.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart' as ph;
 
 class LocationService {
+  final GeolocatorInterface _geolocator;
+
+  /// Creates a LocationService with an optional GeolocatorInterface.
+  /// If not provided, uses GeolocatorWrapper as default.
+  LocationService({GeolocatorInterface? geolocator})
+      : _geolocator = geolocator ?? GeolocatorWrapper();
+
   Future<bool> isLocationServiceEnabled() async {
-    return await Geolocator.isLocationServiceEnabled();
+    return await _geolocator.isLocationServiceEnabled();
   }
 
   Future<LocationPermission> checkPermission() async {
-    return await Geolocator.checkPermission();
+    return await _geolocator.checkPermission();
   }
 
   Future<bool> requestPermission() async {
@@ -31,7 +40,7 @@ class LocationService {
       );
     }
 
-    permission = await Geolocator.requestPermission();
+    permission = await _geolocator.requestPermission();
     if (permission == LocationPermission.denied) {
       throw custom_exceptions.LocationPermissionDeniedException(
         'Location permission was denied. Please grant location access to use this feature.',
@@ -67,7 +76,7 @@ class LocationService {
       }
 
       try {
-        return await Geolocator.getCurrentPosition();
+        return await _geolocator.getCurrentPosition();
       } on TimeoutException {
         throw custom_exceptions.LocationTimeoutException(
           'Location request timed out. Please check your GPS signal and try again.',
@@ -84,7 +93,7 @@ class LocationService {
       }
     } catch (e) {
       if (e is custom_exceptions.LocationPermissionDeniedException ||
-          e is LocationServiceDisabledException ||
+          e is custom_exceptions.LocationServiceDisabledException ||
           e is custom_exceptions.LocationTimeoutException ||
           e is custom_exceptions.LocationException) {
         rethrow;
@@ -108,7 +117,7 @@ class LocationService {
         return null;
       }
 
-      return await Geolocator.getLastKnownPosition();
+      return await _geolocator.getLastKnownPosition();
     } catch (e) {
       return null;
     }
@@ -119,7 +128,7 @@ class LocationService {
   }
 
   Future<bool> openLocationSettings() async {
-    return await Geolocator.openLocationSettings();
+    return await _geolocator.openLocationSettings();
   }
 }
 

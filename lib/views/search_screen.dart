@@ -84,7 +84,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         city.name,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      subtitle: Text(city.country ?? ''),
+                      subtitle: Text('${city.country ?? ''}'),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
                         weatherViewModel.fetchWeather(city);
