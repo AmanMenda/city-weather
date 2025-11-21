@@ -70,7 +70,7 @@ class WeatherScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       Card(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
@@ -99,7 +99,7 @@ class WeatherScreen extends StatelessWidget {
                         icon: const Icon(Icons.map),
                         label: const Text('Open in Maps'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white.withOpacity(0.2),
+                          backgroundColor: Colors.white.withValues(alpha: 0.2),
                           foregroundColor: Colors.white,
                         ),
                       ),
