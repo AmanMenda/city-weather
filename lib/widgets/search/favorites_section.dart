@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:city_weather/models/city.dart';
+import 'package:city_weather/models/weather.dart';
 import 'package:city_weather/widgets/search/favorite_card.dart';
 
 class FavoritesSection extends StatelessWidget {
   final List<City> favorites;
   final Function(City) onFavoriteTap;
   final Function(City) onFavoriteRemove;
+  final Map<City, Weather?> favoritesWeather;
 
   const FavoritesSection({
     super.key,
     required this.favorites,
     required this.onFavoriteTap,
     required this.onFavoriteRemove,
+    required this.favoritesWeather,
   });
 
   @override
@@ -49,6 +52,7 @@ class FavoritesSection extends StatelessWidget {
               final city = favorites[index];
               return FavoriteCard(
                 city: city,
+                weather: favoritesWeather[city],
                 onTap: () => onFavoriteTap(city),
                 onRemove: () => onFavoriteRemove(city),
               );
