@@ -147,6 +147,7 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
               FavoritesSection(
                 favorites: searchViewModel.favorites,
+                favoritesWeather: searchViewModel.favoritesWeather,
                 onFavoriteTap: _handleFavoriteTap,
                 onFavoriteRemove: _handleFavoriteRemove,
               ),

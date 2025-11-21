@@ -54,7 +54,7 @@ class FavoriteService {
   Future<bool> isFavorite(City city) async {
     try {
       final favorites = await getFavorites();
-      return favorites.any((c) => c.isSameCity(city));
+      return favorites.any((c) => c.isSameLocation(city));
     } catch (e) {
       return false;
     }

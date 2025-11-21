@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:city_weather/models/city.dart';
+import 'package:city_weather/models/weather.dart';
 import 'package:city_weather/services/api_service.dart';
 import 'package:city_weather/services/favorite_service.dart';
 
@@ -12,6 +13,9 @@ class SearchViewModel extends ChangeNotifier {
 
   List<City> _favorites = [];
   List<City> get favorites => _favorites;
+
+  Map<City, Weather?> _favoritesWeather = {};
+  Map<City, Weather?> get favoritesWeather => _favoritesWeather;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -32,6 +36,7 @@ class SearchViewModel extends ChangeNotifier {
 
     try {
       _favorites = await _favoriteService.getFavorites();
+      await loadFavoritesWeather();
     } catch (e) {
       _errorMessage = 'Failed to load favorites: $e';
     } finally {
@@ -40,11 +45,42 @@ class SearchViewModel extends ChangeNotifier {
     }
   }
 
+  Future<void> loadFavoritesWeather() async {
+    _favoritesWeather.clear();
+    for (final city in _favorites) {
+      try {
+        final weather = await _apiService.getWeather(
+          city.latitude,
+          city.longitude,
+        );
+        _favoritesWeather[city] = weather;
+      } catch (e) {
+        _favoritesWeather[city] = null;
+      }
+    }
+    notifyListeners();
+  }
+
+  Weather? getFavoriteWeather(City city) {
+    return _favoritesWeather[city];
+  }
+
   Future<bool> addFavorite(City city) async {
     try {
       final success = await _favoriteService.addFavorite(city);
       if (success) {
         await loadFavorites();
+        try {
+          final weather = await _apiService.getWeather(
+            city.latitude,
+            city.longitude,
+          );
+          _favoritesWeather[city] = weather;
+          notifyListeners();
+        } catch (e) {
+          _favoritesWeather[city] = null;
+          notifyListeners();
+        }
       }
       return success;
     } catch (e) {
@@ -69,7 +105,7 @@ class SearchViewModel extends ChangeNotifier {
   }
 
   bool isFavorite(City city) {
-    return _favorites.any((c) => c.isSameCity(city));
+    return _favorites.any((c) => c.isSameLocation(city));
   }
 
   Future<void> searchCities(String query) async {
