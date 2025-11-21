@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/city.dart';
-import '../services/api_service.dart';
+import 'package:city_weather/models/city.dart';
+import 'package:city_weather/services/api_service.dart';
 
 class SearchViewModel extends ChangeNotifier {
   final ApiService _apiService = ApiService();
