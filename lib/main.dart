@@ -3,8 +3,14 @@ import 'package:city_weather/views/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:city_weather/viewmodels/weather_viewmodel.dart';
+import 'package:city_weather/services/database_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize database
+  await DatabaseService.instance.database;
+
   runApp(const CityWeatherApp());
 }
 
