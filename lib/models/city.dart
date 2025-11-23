@@ -44,10 +44,8 @@ class City {
     );
   }
 
-  // Helper method to check equality based on coordinates and name
-  bool isSameCity(City other) {
-    return name == other.name &&
-        latitude == other.latitude &&
-        longitude == other.longitude;
+  bool isSameLocation(City other, {double tolerance = 0.01}) {
+    return (latitude - other.latitude).abs() < tolerance &&
+        (longitude - other.longitude).abs() < tolerance;
   }
 }
